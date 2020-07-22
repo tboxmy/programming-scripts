@@ -1,0 +1,53 @@
+#!/bin/bash
+#  Purpose: Scripts to manage project folders for Drupal 8 application
+#  crontab runs this script to backup files project. This is done by syncing project to a backup folder or compress the folder to a tar file..
+#  Author: Nicholas A S
+#  Created date: 1 Mar 2019
+  
+SOURCEBASEDIR="/var/www/"
+DESTDIR="/home/tboxmy/BACKUPCMG/"
+# Default project
+PROJECT="laravel"
+DESTPROJECT=""
+FLAG=false
+TIMELINE=`date +"%0U"`
+
+if [ -z $1 ]; then
+  echo "Syntax: $0 <source project name> <dest backupdir> [tar]"
+  echo "Do not use smbolic link for project name. Leave dest project blank for default"
+  exit 1
+elif [ ! -d "$SOURCEBASEDIR${1}" ]; then 
+  echo "Source not found for $SOURCEDIR$1"
+  exit 1
+else
+  if [ ! -z $2 ] && [ -d "$DESTDIR$2" ]; then
+    DESTPROJECT=$2
+    if [ -d "$SOURCEBASEDIR$1" ]; then
+      PROJECT="$1"
+      FLAG=true
+    fi
+  fi
+fi
+if [ $FLAG == "false" ]; then
+  echo "SOURCE BASE $SOURCEBASEDIR"
+  echo "DESTINATION BASE $DESTDIR"
+  exit 1
+else
+  echo "1=$1, 2=$2 3=$3 TARGETFILE=$TARGETFILE"
+fi
+SOURCEDIR="$SOURCEBASEDIR$PROJECT/"
+DESTDIR="$DESTDIR$DESTPROJECT/"
+echo "SOURCEDIR = $SOURCEDIR"
+echo "DESTDIR = $DESTDIR"
+
+if [ ! -z $3 ] && [ $3 == "tar" ]; then
+    # Week: Compress the project folder to a single TAR file
+    TARGETFILE="$PROJECT-$TIMELINE.tgz"
+    echo "tar cvzf \"$DESTDIR$TARGETFILE\" -C \"$SOURCEBASEDIR\" $PROJECT --exclude \".git\" --exclude \"storage/app/xls/\" --exclude \"web/.cache\""
+    tar cvzf "$DESTDIR$TARGETFILE" -C "$SOURCEBASEDIR" $PROJECT --exclude ".git" --exclude "storage/app/xls/" --exclude "web/.cache" --exclude "$PROJECT/.cache"
+else
+    # Non week: Synchronise project folder to a backup folder
+    date > $SOURCEDIR/.rsync_lastrun.txt
+    rsync -avz --delete --exclude-from "/home/tboxmy/scripts/.rsyncignore" "$SOURCEDIR" "$DESTDIR$PROJECT"
+    echo " rsync -avz --delete --exclude-from \"/home/tboxmy/scripts/.rsyncignore\" \"$SOURCEDIR\" \"$DESTDIR$PROJECT\" "
+fi

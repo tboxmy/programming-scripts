@@ -1,0 +1,38 @@
+#!/bin/bash
+#  Purpose: Scripts to manage MySQL database backup for Drupal 8 application
+#  crontab runs this script to backup files project. This is done by syncing project to a backup folder or compress the folder to a tar file..
+#  Author: Nicholas A S
+#  Created date: 1 Mar 2019
+  
+SOURCEBASEDIR="/var/www/"
+
+DESTDIR="/home/tboxmy/BACKUP/"
+DBNAME="database_name"
+DESTPROJECT=""
+FLAG=false
+STEP1="fail"
+## Method 1
+## Where %0U is week number of year.
+timeline=`date +"%0U"`
+
+if [ ! -z $1 ]; then
+    DESTDIR="$DESTDIR${1}/"
+    FLAG=true
+fi
+if [ $FLAG == "false" ]; then
+    echo "Syntax: $0 <dest>"
+    echo "DATABASE $DBNAME"
+    echo "DESTINATION BASE $DESTDIR"
+    exit 1
+fi
+# Start rsync
+DESTFILENAME="$DBNAME-$timeline.sql"
+mysqldump -uroot  -pPASSWORD ${DBNAME} > "${DESTDIR}${DESTFILENAME}"
+if [ $? == 0 ]; then
+    STEP1="ok";
+fi
+if [ $STEP1 == "ok" ]; then
+    echo "${DESTDIR}${DESTFILENAME} OK"
+else
+    echo "${DESTDIR}${DESTFILENAME} FAIL"
+fi
