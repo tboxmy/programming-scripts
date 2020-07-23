@@ -16,7 +16,7 @@ $link = mysqli_connect("localhost", "root", "password", "database_name");
 if($link === false){
     die("ERROR: Could not connect. " . mysqli_connect_error());
 }
-$html ="<h1>Visitors Log</h1>";
+$html ="<h1>Pages Statistics</h1>";
 $html .= "<a href=/cmd>home</a><br/>";
 echo $html;
 
@@ -26,17 +26,17 @@ mysqli_close($link);
 
 function showTable($link) {
 // Select query execution
-// Default to past 7 days data
-$sql1 = "SELECT * FROM `wp_statistics_visitor` ";
-$sql_locations = "SELECT location FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location";
-$sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY last_counter";
-$sql3 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` GROUP BY location,last_counter";
-$sql2 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location,last_counter";
+$sql1 = "SELECT * FROM `wp_statistics_pages` where type is not null AND type <> '' ORDER BY uri";
 
+$sql_uri = "SELECT uri FROM `wp_statistics_pages` WHERE type is not null AND type <> '' AND date > DATE(NOW()) - INTERVAL 7 DAY GROUP BY uri";
+$sql_dates = "SELECT date(date) FROM `wp_statistics_pages` WHERE type is not null AND type <> '' AND date > DATE(NOW()) - INTERVAL 7 DAY GROUP BY date";
+// $sql_locations = "SELECT location FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location";
+// $sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY last_counter";
+$sql2 = "SELECT uri, date, count amount FROM `wp_statistics_pages` WHERE type is not null AND type <> '' AND date > DATE(NOW()) - INTERVAL 7 DAY GROUP BY uri,date";
 /** 
  Load list of locations
 */
-$sql = $sql_locations;
+$sql = $sql_uri;
 $locations = array();
 if($result = mysqli_query($link, $sql)){
     if(mysqli_num_rows($result) > 0){
@@ -44,7 +44,7 @@ if($result = mysqli_query($link, $sql)){
             $locations[] = $row[0];
         }
     }
-    echo "<br/>Summary<br/>";
+    echo "<br/>Summary(Last 7 days)<br/>";
 } else {
     echo "No records matching your query were found.";
     exit (1);
@@ -70,14 +70,14 @@ $statistics = array();
 if($result = mysqli_query($link, $sql)){
     if(mysqli_num_rows($result) > 0){
         while($row = mysqli_fetch_array($result)){
-            $statistics[$row['location']][$row['last_counter']] = $row['amount'];
+            $statistics[$row['uri']][$row['date']] = $row['amount'];
         }
     }
 } 
 
 print ("<table border=1>");
 print ("<tr>");
-print ("<th>Country</th>");
+print ("<th>URL</th>");
 foreach($last_dates as $row){
     echo "<th>".$row."</th>";
 }
@@ -100,6 +100,9 @@ foreach($locations as $row){
     print("</tr>");
 }
     print("<tr><td>TOTAL:</td>");
+/*
+  Total to display based on date keys
+*/
     foreach($last_dates as $dates){
        print("<td>".$count_dates[$dates]."</td>");
     }

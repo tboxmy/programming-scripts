@@ -13,6 +13,6 @@
 <OL>
 <li><a href="my-wpstatistics-p1.php">View Visitor Statistics</a>(<a href="my-wpstatistics-p3.php">Summary</a>)
 </li>
-<li><a href="my-wpstatistics-p2.php">View Pages Statistics</a>
+<li><a href="my-wpstatistics-p2.php">View Page Statistics</a>(<a href="my-wpstatistics-p4.php">Summary</a>)
 </li>
 </OL>
