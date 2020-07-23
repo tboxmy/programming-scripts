@@ -11,7 +11,7 @@
 
 <h2>WP Statistics module</h2>
 <OL>
-<li><a href="my-wpstatistics-p1.php">View Visitor Statistics</a>
+<li><a href="my-wpstatistics-p1.php">View Visitor Statistics</a>(<a href="my-wpstatistics-p3.php">Summary</a>)
 </li>
 <li><a href="my-wpstatistics-p2.php">View Pages Statistics</a>
 </li>
