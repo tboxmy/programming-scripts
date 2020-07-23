@@ -26,10 +26,13 @@ mysqli_close($link);
 
 function showTable($link) {
 // Select query execution
+// Default to past 7 days data
 $sql1 = "SELECT * FROM `wp_statistics_visitor` ";
-$sql_locations = "SELECT location FROM `wp_statistics_visitor` GROUP BY location";
-$sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` GROUP BY last_counter";
-$sql2 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` GROUP BY location,last_counter";
+$sql_locations = "SELECT location FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location";
+$sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY last_counter";
+$sql3 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` GROUP BY location,last_counter";
+$sql2 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location,last_counter";
+
 /** 
  Load list of locations
 */
