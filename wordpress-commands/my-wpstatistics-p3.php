@@ -1,3 +1,9 @@
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+</head>
+<body>
 <?php
 /*
   Purpose: Scripts to visitor session information from WP Statistics in Wordpress 5
@@ -10,6 +16,7 @@
   Format
   $link = mysqli_connect(HOSTNAME, DATABASE_USERNAME, USERNAME_PASSWORD, DATABASE_NAME);
 */
+
 $link = mysqli_connect("localhost", "root", "password", "database_name");
  
 // Check connection
@@ -20,19 +27,15 @@ $html ="<h1>Visitors Log</h1>";
 $html .= "<a href=/cmd>home</a><br/>";
 echo $html;
 
-showTable($link);
-// Close connection
-mysqli_close($link);
+// showTable($link);
 
-function showTable($link) {
+// function showTable($link) {
 // Select query execution
-// Default to past 7 days data
 $sql1 = "SELECT * FROM `wp_statistics_visitor` ";
 $sql_locations = "SELECT location FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location";
 $sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY last_counter";
 $sql3 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` GROUP BY location,last_counter";
 $sql2 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location,last_counter";
-
 /** 
  Load list of locations
 */
@@ -44,7 +47,7 @@ if($result = mysqli_query($link, $sql)){
             $locations[] = $row[0];
         }
     }
-    echo "<br/>Summary<br/>";
+    echo "<br/>Summary(last 7 days)<br/>";
 } else {
     echo "No records matching your query were found.";
     exit (1);
@@ -100,12 +103,77 @@ foreach($locations as $row){
     print("</tr>");
 }
     print("<tr><td>TOTAL:</td>");
-    foreach($last_dates as $dates){
-       print("<td>".$count_dates[$dates]."</td>");
+// print("<td>"); print_r($count_dates); print("</td>");
+    foreach($count_dates as $count_date){
+       print("<td>".$count_date."</td>");
     }
     print("</tr>");
 print ("</table>");
 
-}
+?>
+<div id="chart-container">
+    <canvas id="graphCanvas"></canvas>
+</div>
 
+<script>
+var ctx = document.getElementById('graphCanvas').getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [<?php 
+    $start = "n";
+    foreach($last_dates as $dates){
+       if($start == "y") 
+       print(", ");
+       else $start="y";
+       print("'".$dates."'");
+       
+    }
+    ?>],
+        datasets: [{
+            label: '# of Visitors',
+            data: [12, 19, 3, 5, 2, 3],
+            data: [<?php
+            $start = "n";
+            foreach($count_dates as $count_date){
+                if($start == "y") 
+                print(", ");
+                else $start="y";
+                print($count_date);
+            }
+            ?>],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+</script>
+</body>
+<?php
+// Close connection
+mysqli_close($link);
 ?>
