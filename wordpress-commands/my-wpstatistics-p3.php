@@ -34,7 +34,6 @@ echo $html;
 $sql1 = "SELECT * FROM `wp_statistics_visitor` ";
 $sql_locations = "SELECT location FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location";
 $sql_dates = "SELECT date(last_counter) FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY last_counter";
-$sql3 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` GROUP BY location,last_counter";
 $sql2 = "SELECT location, last_counter, count(location) amount FROM `wp_statistics_visitor` WHERE last_counter > DATE(NOW()) - INTERVAL 7 DAY GROUP BY location,last_counter";
 /** 
  Load list of locations
@@ -88,14 +87,14 @@ print ("</tr>");
 $count_dates = array();
 foreach($locations as $row){
     print("<tr><td>".$row."</td>");
-    foreach($last_dates as $dates){
+    foreach($last_dates as $date){
        print("<td>");
-       if(  isset($statistics[$row][$dates]) ){
-           print( $statistics[$row][$dates] );
-           if(isset($count_dates[$dates]) ){
-               $count_dates[$dates] += $statistics[$row][$dates];
+       if(  isset($statistics[$row][$date]) ){
+           print( $statistics[$row][$date] );
+           if(isset($count_dates[$date]) ){
+               $count_dates[$date] += $statistics[$row][$date];
            } else {
-               $count_dates[$dates] = $statistics[$row][$dates];
+               $count_dates[$date] = $statistics[$row][$date];
            }
        }
        print("</td>");
@@ -103,9 +102,8 @@ foreach($locations as $row){
     print("</tr>");
 }
     print("<tr><td>TOTAL:</td>");
-// print("<td>"); print_r($count_dates); print("</td>");
-    foreach($count_dates as $count_date){
-       print("<td>".$count_date."</td>");
+    foreach($last_dates as $date){
+       print("<td>".$count_dates[$date]."</td>");
     }
     print("</tr>");
 print ("</table>");
@@ -135,11 +133,11 @@ var myChart = new Chart(ctx, {
             data: [12, 19, 3, 5, 2, 3],
             data: [<?php
             $start = "n";
-            foreach($count_dates as $count_date){
+            foreach($last_dates as $date){
                 if($start == "y") 
                 print(", ");
                 else $start="y";
-                print($count_date);
+                print($count_dates[$date]);
             }
             ?>],
             backgroundColor: [
